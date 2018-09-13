@@ -1,8 +1,8 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
-import { NormalMidMiddleware } from "../middleware/normal-mid/normal-mid.middleware";
-import { ParamMidMiddleware } from "../middleware/param-mid/param-mid.middleware";
+import { NormalMidMiddleware } from "middleware/normal-mid/normal-mid.middleware";
+import { ParamMidMiddleware } from "middleware/param-mid/param-mid.middleware";
 
 @Module({
   controllers: [UserController],
