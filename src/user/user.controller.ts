@@ -7,14 +7,17 @@ import {
   HttpException,
   HttpStatus,
   UnauthorizedException,
-  UseFilters
+  UseFilters,
+  ValidationPipe
 } from '@nestjs/common';
 import { UserService } from "./user.service";
-import { UserDto } from "./user.dto";
+import { ClientUserDto } from "./user.dto";
 import { HttpExceptionFilterFilter } from "filter/http-exception-filter";
 import { MultiHttpExceptionFilterFilter } from "filter/multi-http-exception-filter";
+import { UserValidPipe, ParseIntPipe } from "./user.pipe";
 
 @Controller('user')
+// @UseFilters(HttpExceptionFilterFilter) 这里使用可以覆盖整个controller
 export class UserController {
 
   constructor(private readonly userService: UserService) { }
@@ -46,19 +49,22 @@ export class UserController {
   }
 
   @Get('/:id')
-  async getUserById(@Param() { id }) {
+  async getUserById(@Param('id', new ParseIntPipe()) id) {
     const user = await this.userService.getUser(+id);
     return user;
   }
 
   @Post()
-  async createAccount(@Body() { name, password }: UserDto) {
-    const id = await this.userService.getNewUserId();
+  async createAccount(@Body(new ValidationPipe({
+    transform: true,
+    validationError: {
+      target: false,
+      value: false
+    }
+  })) { name, password }: ClientUserDto) {
     return this.userService.createUser({
-      id,
       name,
       password
     });
   }
-
 }

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { UserDto } from './user.dto';
+import { ClientUserDto, DataUserDto } from './user.dto';
 
 // 模拟获取数据时的延时状态
 const getDataDelay = <T>(data: T, delay = 500): Promise<T> => new Promise((resolve) => {
@@ -9,7 +9,7 @@ const getDataDelay = <T>(data: T, delay = 500): Promise<T> => new Promise((resol
 @Injectable()
 export class UserService {
 
-  private users = [{
+  private users: DataUserDto[] = [{
     id: 1,
     name: 'gogo',
     password: '123456'
@@ -25,8 +25,9 @@ export class UserService {
     }));
   };
 
-  createUser(user: UserDto) {
-    this.users.push(user);
+  async createUser(user: ClientUserDto) {
+    const id = await this.getNewUserId();
+    this.users.push({ id, ...user });
     return `${user.name} created!`;
   };
 
