@@ -8,21 +8,28 @@ import {
   HttpStatus,
   UnauthorizedException,
   UseFilters,
-  ValidationPipe
+  ValidationPipe,
+  UseGuards,
+  UseInterceptors
 } from '@nestjs/common';
 import { UserService } from "./user.service";
 import { ClientUserDto } from "./user.dto";
 import { HttpExceptionFilterFilter } from "filter/http-exception-filter";
 import { MultiHttpExceptionFilterFilter } from "filter/multi-http-exception-filter";
 import { UserValidPipe, ParseIntPipe } from "./user.pipe";
+import { RolesGuard, Roles } from "../guards/roles/roles.guard";
+import { LoggingInterceptor, TransformInterceptor } from "../intercetor/logging/logging.interceptor";
 
 @Controller('user')
+@UseGuards(RolesGuard)
+@UseInterceptors(TransformInterceptor)
 // @UseFilters(HttpExceptionFilterFilter) 这里使用可以覆盖整个controller
 export class UserController {
 
   constructor(private readonly userService: UserService) { }
 
   @Get()
+  @Roles('admin')
   async getAllUsers() {
     const allUsers = await this.userService.getAllUsers();
     return allUsers;
@@ -49,6 +56,7 @@ export class UserController {
   }
 
   @Get('/:id')
+  @UseInterceptors(LoggingInterceptor)
   async getUserById(@Param('id', new ParseIntPipe()) id) {
     const user = await this.userService.getUser(+id);
     return user;
